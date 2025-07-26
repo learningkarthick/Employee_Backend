@@ -14,6 +14,6 @@ spec:
     spec:
       containers:
         - name: employee-backend
-          image: learningkarthick/employee-backend:20250726181342  # Change if using Docker Hub/Harbor
+          image: learningkarthick/employee-backend:20250726232345  # Change if using Docker Hub/Harbor
           ports:
             - containerPort: 8080
