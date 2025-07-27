@@ -1,4 +1,4 @@
-Great, you have provided the necessary YAMLs and Jenkinsfile to build a **complete deployment pipeline document**. I'll create a **detailed technical document** authored by *Karthick Pitchaimari* and *Vijeyender Ravi*, covering:
+ **detailed technical document** authored by *Karthick Pitchaimari* covering:
 
 ✅ Spring Boot + PostgreSQL setup
 ✅ Docker image creation
