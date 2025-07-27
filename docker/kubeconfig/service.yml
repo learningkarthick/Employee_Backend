@@ -5,10 +5,10 @@ metadata:
   labels:
     app: employee-backend
 spec:
-  type: LoadBalancer
   selector:
     app: employee-backend
   ports:
     - protocol: TCP
-      port: 80
-      targetPort: 80
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP
