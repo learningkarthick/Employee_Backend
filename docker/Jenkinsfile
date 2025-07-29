@@ -8,6 +8,7 @@ pipeline {
         IMAGE_NAME = "learningkarthick/employee-backend"
 		 TAG = "${new Date().format('yyyyMMddHHmmss')}"
 		  ACR_LOGIN = 'employeeregistryacr.azurecr.io'
+		   FULL_IMAGE = '${ACR_LOGIN}/${IMAGE_NAME}:${TAG}'
     }
 
 
@@ -67,12 +68,29 @@ pipeline {
                             steps {
                                 script {
                                 bat """
-
-                                docker tag %IMAGE_NAME%:%TAG% employeeregistryacr.azurecr.io/%IMAGE_NAME%:%TAG%
-                                    docker push $ACR_LOGIN/%IMAGE_NAME%:%TAG%
+                                    docker push %FULL_IMAGE%
                                     """
                                 }
                             }
                         }
+                        stage('Update Deployment YAML with Tag') {
+                         steps {
+                       script {
+                    bat """
+                    powershell -Command "(Get-Content docker/kubeconfig/deployment.yaml) -replace '\\$\\{TAG\\}', '%TAG%' | Set-Content docker/kubeconfig/deployment-updated.yaml"
+                    """
+                    echo "✅ Updated deployment file with tag ${TAG}"
+                }
+            }
+        }
+         stage('Deploy to AKS') {
+            steps {
+                bat """
+                kubectl apply -f docker/kubeconfig/deployment-updated.yaml
+                """
+                echo "✅ Deployment applied with image ${FULL_IMAGE}"
+            }
+        }
+
     }
 }
