@@ -74,15 +74,17 @@ pipeline {
                             }
                         }
                         stage('Update Deployment YAML with Tag') {
-                         steps {
-                       script {
-                    bat """
-                    powershell -Command "(Get-Content docker/kubeconfig/deployment.yaml) -replace '\\$\\{TAG\\}', '%TAG%' | Set-Content docker/kubeconfig/deployment-updated.yaml"
-                    """
-                    echo "✅ Updated deployment file with tag ${TAG}"
-                }
-            }
+            steps {
+                script {
+                    // Use single quotes in Groovy so $ is not interpolated by Groovy itself
+            bat '''
+            powershell -Command "(Get-Content k8s/deployment.yaml) -replace '\\${TAG}', '%TAG%' | Set-Content k8s/deployment-updated.yaml"
+            '''
+            echo "✅ Updated deployment file with tag ${TAG}"
         }
+    }
+}
+
          stage('Deploy to AKS') {
             steps {
                 bat """
