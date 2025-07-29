@@ -78,7 +78,7 @@ pipeline {
                 script {
                     // Use single quotes in Groovy so $ is not interpolated by Groovy itself
             bat '''
-            powershell -Command "(Get-Content k8s/deployment.yaml) -replace '\\${TAG}', '%TAG%' | Set-Content k8s/deployment-updated.yaml"
+            powershell -Command "(Get-Content docker/kubeconfig/Deployment.yml) -replace '\\${TAG}', '%TAG%' | Set-Content docker/kubeconfig/deployment-updated.yaml"
             '''
             echo "✅ Updated deployment file with tag ${TAG}"
         }
