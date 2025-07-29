@@ -8,7 +8,7 @@ pipeline {
         IMAGE_NAME = "learningkarthick/employee-backend"
 		 TAG = "${new Date().format('yyyyMMddHHmmss')}"
 		  ACR_LOGIN = 'employeeregistryacr.azurecr.io'
-		   FULL_IMAGE = '${ACR_LOGIN}/${IMAGE_NAME}:${TAG}'
+		   FULL_IMAGE = "${ACR_LOGIN}/${IMAGE_NAME}:${TAG}"
     }
 
 
@@ -53,10 +53,10 @@ pipeline {
             }
         }
          stage('Login to ACR') {
-                    steps {
-                        withCredentials([usernamePassword(credentialsId: 'employee-azure-registry-token', usernameVariable: 'ACR_USERNAME', passwordVariable: 'ACR_PASSWORD')]) {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'employee-azure-registry-token', usernameVariable: 'ACR_USERNAME', passwordVariable: 'ACR_PASSWORD')]) {
 
-                                bat """
+                    bat """
                                 echo $ACR_PASSWORD | docker login $ACR_LOGIN -u $ACR_USERNAME --password-stdin"
                                 echo ✅ ACR logged in successfully
                                  """
@@ -65,9 +65,9 @@ pipeline {
                     }
                 }
                   stage('Push to ACR') {
-                            steps {
-                                script {
-                                bat """
+            steps {
+                script {
+                    bat """
                                     docker push %FULL_IMAGE%
                                     """
                                 }
