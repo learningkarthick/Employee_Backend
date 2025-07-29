@@ -67,6 +67,8 @@ pipeline {
                             steps {
                                 script {
                                 bat """
+
+                                docker tag %IMAGE_NAME%:%TAG% employeeregistryacr.azurecr.io/%IMAGE_NAME%:%TAG%
                                     docker push $ACR_LOGIN/%IMAGE_NAME%:%TAG%
                                     """
                                 }
