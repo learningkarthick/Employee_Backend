@@ -67,7 +67,7 @@ pipeline {
                             steps {
                                 script {
                                 bat """
-                                    docker push $ACR_LOGIN/myapp:${BUILD_NUMBER}
+                                    docker push $ACR_LOGIN/%IMAGE_NAME%:%TAG%
                                     """
                                 }
                             }
