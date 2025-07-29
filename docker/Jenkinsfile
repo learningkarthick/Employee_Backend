@@ -42,7 +42,7 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 bat """
-//                 docker push %IMAGE_NAME%:%TAG%
+
                 """
             }
         }
@@ -54,12 +54,12 @@ pipeline {
          stage('Login to ACR') {
                     steps {
                         withCredentials([usernamePassword(credentialsId: 'employee-azure-registry-token', usernameVariable: 'ACR_USERNAME', passwordVariable: 'ACR_PASSWORD')]) {
-//                             script {
+
                                 bat """
                                 echo $ACR_PASSWORD | docker login $ACR_LOGIN -u $ACR_USERNAME --password-stdin"
                                 echo ✅ ACR logged in successfully
                                  """
-//                             }
+
                         }
                     }
                 }
