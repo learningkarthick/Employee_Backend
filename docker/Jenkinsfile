@@ -16,7 +16,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 cleanWs()
-                git branch: 'master',
+                git branch: 'azure-deployment',
                     url: 'https://github.com/learningkarthick/Employee_Backend.git',
                     credentialsId: 'employee-token'
             }
