@@ -14,6 +14,7 @@ spec:
     spec:
       containers:
         - name: employee-backend
-          image:  employeeregistryacr.azurecr.io/learningkarthick/employee-backend:${TAG}  # Change if using Docker Hub/Harbor
+          image: employeeregistryacr.azurecr.io/learningkarthick/employee-backend:${TAG}  # Change if using Docker Hub/Harbor
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080

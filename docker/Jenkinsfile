@@ -3,15 +3,14 @@ pipeline {
     tools {
         maven 'Maven_3'
     }
+
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('employee-docker-token')
         IMAGE_NAME = "learningkarthick/employee-backend"
-		 TAG = "${new Date().format('yyyyMMddHHmmss')}"
-		  ACR_LOGIN = 'employeeregistryacr.azurecr.io'
-		   FULL_IMAGE = "${ACR_LOGIN}/${IMAGE_NAME}:${TAG}"
+        TAG = "${new Date().format('yyyyMMddHHmmss')}"
+        ACR_LOGIN = "employeeregistryacr.azurecr.io"
+        FULL_IMAGE = "${ACR_LOGIN}/${IMAGE_NAME}:${TAG}"
+        KUBECONFIG_PATH = "${WORKSPACE}\\kubeconfig.yml"
     }
-
-
 
     stages {
         stage('Checkout') {
@@ -21,81 +20,73 @@ pipeline {
                     credentialsId: 'employee-token'
             }
         }
+
         stage('Build with Maven') {
             steps {
                 bat 'mvn clean package -DskipTests'
             }
         }
+
         stage('Build Docker Image') {
             steps {
-                bat """
-                docker build -t %IMAGE_NAME%:%TAG% -f docker/Dockerfile .
-                """
+                bat "docker build -t %IMAGE_NAME%:%TAG% -f docker/Dockerfile ."
             }
         }
-        stage('Login to Docker') {
-            steps {
-                bat """
-                echo %DOCKERHUB_CREDENTIALS_PSW% | docker login -u %DOCKERHUB_CREDENTIALS_USR% --password-stdin
-                """
-            }
-        }
-        stage('Push Docker Image') {
-            steps {
-                bat """
 
-                """
-            }
-        }
-		stage('Show Tag') {
-            steps {
-                echo "✅ Docker image pushed as ${IMAGE_NAME}:${TAG}"
-            }
-        }
-         stage('Login to ACR') {
+        stage('Login to ACR') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'employee-azure-registry-token', usernameVariable: 'ACR_USERNAME', passwordVariable: 'ACR_PASSWORD')]) {
-
                     bat """
-                                echo $ACR_PASSWORD | docker login $ACR_LOGIN -u $ACR_USERNAME --password-stdin"
-                                echo ✅ ACR logged in successfully
-                                 """
-
-                        }
-                    }
+                    echo %ACR_PASSWORD% | docker login %ACR_LOGIN% -u %ACR_USERNAME% --password-stdin
+                    echo ✅ ACR login successful
+                    """
                 }
-                  stage('Push to ACR') {
-            steps {
-                script {
-                    bat """
-                    docker tag %IMAGE_NAME%:%TAG% employeeregistryacr.azurecr.io/%IMAGE_NAME%:%TAG%
-                  docker push $ACR_LOGIN/%IMAGE_NAME%:%TAG%
-
-
-                                    """
-                                }
-                            }
-                        }
-                        stage('Update Deployment YAML with Tag') {
-            steps {
-                script {
-                    // Use single quotes in Groovy so $ is not interpolated by Groovy itself
-            bat '''
-            powershell -Command "(Get-Content docker/kubeconfig/Deployment.yml) -replace '\\${TAG}', '%TAG%' | Set-Content docker/kubeconfig/deployment-updated.yaml"
-            '''
-            echo "✅ Updated deployment file with tag ${TAG}"
-        }
-    }
-}
-
-         stage('Deploy to AKS') {
-            steps {
-                bat """
-                kubectl apply -f docker/kubeconfig/deployment-updated.yaml
-                """
-                echo "✅ Deployment applied with image ${FULL_IMAGE}"
             }
         }
 
+        stage('Push to ACR') {
+            steps {
+                bat """
+                docker tag %IMAGE_NAME%:%TAG% %FULL_IMAGE%
+                docker push %FULL_IMAGE%
+                """
+            }
+        }
+
+        stage('Update Deployment YAML') {
+            steps {
+                script {
+                    // Replace image placeholder in deployment YAML
+                    bat """
+                    powershell -Command "(Get-Content docker/kubeconfig/Deployment.yml) -replace 'IMAGE_PLACEHOLDER', '%FULL_IMAGE%' | Set-Content docker/kubeconfig/deployment-updated.yaml"
+                    """
+                }
+            }
+        }
+
+        stage('Login to AKS') {
+            steps {
+                withCredentials([file(credentialsId: 'aks-kubeconfig', variable: 'KUBECONFIG_FILE')]) {
+                    bat """
+                    mkdir %WORKSPACE%\\kube
+                    copy %KUBECONFIG_FILE% %KUBECONFIG_PATH%
+                    set KUBECONFIG=%KUBECONFIG_PATH%
+                    kubectl config get-contexts
+                    echo ✅ Connected to AKS
+                    """
+                }
+            }
+        }
+
+        stage('Deploy to AKS') {
+            steps {
+                bat """
+                set KUBECONFIG=%KUBECONFIG_PATH%
+                kubectl apply -f docker/kubeconfig/deployment-updated.yaml
+                kubectl rollout status deployment/employee-backend
+                echo ✅ Deployment updated with image %FULL_IMAGE%
+                """
+            }
+        }
     }
 }
