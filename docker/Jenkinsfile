@@ -82,7 +82,9 @@ pipeline {
             steps {
                 bat """
                 set KUBECONFIG=%KUBECONFIG_PATH%
+
                 kubectl apply -f docker/kubeconfig/deployment-updated.yaml
+
                 kubectl rollout status deployment/employee-backend
                 echo ✅ Deployment updated with image %FULL_IMAGE%
                 """
