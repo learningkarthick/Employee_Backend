@@ -15,6 +15,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
+                cleanWs()
                 git branch: 'master',
                     url: 'https://github.com/learningkarthick/Employee_Backend.git',
                     credentialsId: 'employee-token'
