@@ -31,7 +31,7 @@ spec:
             - containerPort: 5432
           volumeMounts:
             - mountPath: /var/lib/postgresql/data
-              name: postgres-
+              name: postgres-storage
             - mountPath: "/mnt/secrets"       # ✅ Mount Key Vault secret files
               name: secrets-store
               readOnly: true
@@ -44,4 +44,4 @@ spec:
             driver: secrets-store.csi.k8s.io
             readOnly: true
             volumeAttributes:
-            secretProviderClass: "azure-kv-secrets"
+              secretProviderClass: "azure-kv-secrets"
