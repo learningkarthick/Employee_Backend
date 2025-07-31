@@ -85,6 +85,11 @@ pipeline {
                 set KUBECONFIG=%KUBECONFIG_PATH%
 
                 kubectl apply -f docker/kubeconfig/deployment-updated.yaml
+                kubectl apply -f docker/kubeconfig/ingress.yml
+                kubectl apply -f docker/kubeconfig/service.yml
+                kubectl apply -f docker/kubeconfig/postgresdb-deployment.yml
+                kubectl apply -f docker/kubeconfig/postgresdb-PersistentVolumeClaim.yml
+                kubectl apply -f docker/kubeconfig/SecretProviderClass.yml
 
                 kubectl rollout status deployment/employee-backend
                 echo ✅ Deployment updated with image %FULL_IMAGE%
