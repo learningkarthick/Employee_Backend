@@ -21,12 +21,20 @@ spec:
             - containerPort: 8080
           env:
             - name: SPRING_DATASOURCE_USERNAME
-              value: postgres
+              valueFrom:
+                secretKeyRef:
+                  name: db-username-k8s
+                  key: DB-USERNAME
             - name: SPRING_DATASOURCE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: db-password-k8s
-                  key: POSTGRESPASSWORD
+                  key: DB-PASSWORD
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: db-url-k8s
+                  key: DB-URL
       volumes:
         - name: secrets-store
           csi:
