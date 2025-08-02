@@ -35,6 +35,16 @@ spec:
                 secretKeyRef:
                   name: db-url-k8s
                   key: DB-URL
+
+          # ✅ Added resource requests and limits for HPA compatibility
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+
       volumes:
         - name: secrets-store
           csi:
