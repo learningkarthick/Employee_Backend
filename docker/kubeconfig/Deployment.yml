@@ -36,6 +36,10 @@ spec:
                   name: db-url-k8s
                   key: DB-URL
 
+            # ✅ NEW: Application Insights connection string
+            - name: APPLICATIONINSIGHTS_CONNECTION_STRING
+              value: "InstrumentationKey=1f6e828b-06bb-47c0-94c3-986179dc18a5;IngestionEndpoint=https://eastus-8.in.applicationinsights.azure.com/;LiveEndpoint=https://eastus.livediagnostics.monitor.azure.com/;ApplicationId=a86778e7-f5b8-4bfc-9792-1c77f6a1cf32"
+
           # ✅ Added resource requests and limits for HPA compatibility
           resources:
             requests:
