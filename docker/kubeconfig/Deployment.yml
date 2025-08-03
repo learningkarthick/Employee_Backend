@@ -35,6 +35,16 @@ spec:
                 secretKeyRef:
                   name: db-url-k8s
                   key: DB-URL
+            - name: SPRING_AZURE_BLOB_STORAGE_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: azure-blob-storage-connection-string-k8s
+                  key: AZURE-BLOB-STORAGE-CONNECTION-STRING
+            - name: SPRING_AZURE_BLOB_STORAGE_CONTAINER_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: azure-blob-storage-container-name-k8s
+                  key: AZURE-BLOB-STORAGE-CONTAINER-NAME
 
             # ✅ NEW: Application Insights connection string
             - name: APPLICATIONINSIGHTS_CONNECTION_STRING
