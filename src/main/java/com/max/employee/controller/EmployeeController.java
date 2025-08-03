@@ -1,15 +1,20 @@
 package com.max.employee.controller;
 
 import com.max.employee.model.Employee;
+import com.max.employee.service.EmployeeCsvService;
 import com.max.employee.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/employees")
 public class EmployeeController {
+
+    @Autowired
+    EmployeeCsvService employeeCsvService;
 
      @Autowired
      EmployeeService service;
@@ -39,5 +44,10 @@ public class EmployeeController {
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         service.delete(id);
+    }
+
+    @GetMapping("/generate")
+    public String generateReport() throws IOException {
+        return employeeCsvService.generateAndUploadCsv();
     }
 }
