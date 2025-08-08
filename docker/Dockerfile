@@ -5,7 +5,7 @@ WORKDIR /app
 # ✅ Download and add Application Insights Java Agent
 ADD https://github.com/microsoft/ApplicationInsights-Java/releases/download/3.4.9/applicationinsights-agent-3.4.9.jar /app/applicationinsights-agent.jar
 # ✅ Copy your Spring Boot JAR
-COPY target/employee-0.0.1-SNAPSHOT.jar app.jar
+COPY target/employee-backend.jar app.jar
 
 # ✅ Use the agent and read connection string from env variable
 ENTRYPOINT ["java", "-javaagent:/app/applicationinsights-agent.jar", "-jar", "app.jar"]
