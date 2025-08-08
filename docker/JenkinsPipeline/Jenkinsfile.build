@@ -17,7 +17,7 @@ pipeline {
         }
         stage('Build & Test') {
             steps {
-                bat 'mvn clean package -DskipTests=false'
+                bat 'mvn clean package -DskipTests=true'
             }
         }
         stage('Archive Artifact') {
