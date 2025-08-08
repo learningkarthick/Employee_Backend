@@ -1,0 +1,34 @@
+pipeline {
+    agent any
+    tools {
+        maven 'Maven_3'
+    }
+    environment {
+        ARTIFACT_NAME = "employee-backend.jar"
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                cleanWs()
+                git branch: 'azure-deployment',
+                    url: 'https://github.com/learningkarthick/Employee_Backend.git',
+                    credentialsId: 'employee-token'
+            }
+        }
+        stage('Build & Test') {
+            steps {
+                bat 'mvn clean package -DskipTests=false'
+            }
+        }
+        stage('Archive Artifact') {
+            steps {
+                archiveArtifacts artifacts: "target/${ARTIFACT_NAME}", fingerprint: true
+            }
+        }
+    }
+    post {
+        success {
+            build job: 'employee-backend-image', wait: false
+        }
+    }
+}

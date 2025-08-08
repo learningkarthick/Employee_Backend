@@ -1,0 +1,47 @@
+pipeline {
+    agent any
+    environment {
+        IMAGE_NAME = "learningkarthick/employee-backend"
+        ACR_LOGIN = "employeeregistryacr.azurecr.io"
+    }
+    stages {
+        stage('Get Artifact') {
+            steps {
+                // Requires "Copy Artifact" plugin
+                copyArtifacts(projectName: 'employee-backend-build', selector: lastSuccessful())
+            }
+        }
+        stage('Create TAG') {
+            steps {
+                script {
+                    env.TAG = new Date().format('yyyyMMddHHmmss')
+                    env.FULL_IMAGE = "${env.ACR_LOGIN}/${env.IMAGE_NAME}:${env.TAG}"
+                }
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                // Windows agent:
+                bat "docker build -t %IMAGE_NAME%:%TAG% -f docker/Dockerfile ."
+                // If Linux agent: use sh "docker build -t $IMAGE_NAME:$TAG -f docker/Dockerfile ."
+            }
+        }
+        stage('Login & Push to ACR') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'employee-azure-registry-token', usernameVariable: 'ACR_USERNAME', passwordVariable: 'ACR_PASSWORD')]) {
+                    bat """
+                    echo %ACR_PASSWORD% | docker login %ACR_LOGIN% -u %ACR_USERNAME% --password-stdin
+                    docker tag %IMAGE_NAME%:%TAG% %FULL_IMAGE%
+                    docker push %FULL_IMAGE%
+                    """
+                }
+            }
+        }
+    }
+    post {
+        success {
+            // trigger deployment job, pass IMAGE_TAG
+            build job: 'employee-backend-deploy', parameters: [string(name:'IMAGE_TAG', value: "${env.TAG}")], wait: false
+        }
+    }
+}

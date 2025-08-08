@@ -1,0 +1,57 @@
+pipeline {
+    agent any
+    parameters {
+        string(name: 'IMAGE_TAG', description: 'Image tag to deploy')
+    }
+    environment {
+        IMAGE_NAME = "learningkarthick/employee-backend"
+        ACR_LOGIN = "employeeregistryacr.azurecr.io"
+        FULL_IMAGE = "${env.ACR_LOGIN}/${env.IMAGE_NAME}:${params.IMAGE_TAG}"
+        KUBECONFIG_PATH = "${WORKSPACE}\\kubeconfig.yml"
+    }
+    stages {
+        stage('Checkout YAMLs') {
+            steps {
+                cleanWs()
+                git branch: 'azure-deployment',
+                    url: 'https://github.com/learningkarthick/Employee_Backend.git',
+                    credentialsId: 'employee-token'
+            }
+        }
+        stage('Replace IMAGE in YAML') {
+            steps {
+                bat """
+                powershell -Command "(Get-Content docker/kubeconfig/Deployment.yml) -replace 'IMAGE_PLACEHOLDER', '%FULL_IMAGE%' | Set-Content docker/kubeconfig/deployment-updated.yaml"
+                """
+                // Linux alternative: sh "sed -e 's|IMAGE_PLACEHOLDER|${FULL_IMAGE}|g' docker/kubeconfig/Deployment.yml > docker/kubeconfig/deployment-updated.yaml"
+            }
+        }
+        stage('Login to AKS') {
+            steps {
+                withCredentials([file(credentialsId: 'aks-kubeconfig', variable: 'KUBECONFIG_FILE')]) {
+                    bat """
+                    mkdir %WORKSPACE%\\kube
+                    copy %KUBECONFIG_FILE% %KUBECONFIG_PATH%
+                    set KUBECONFIG=%KUBECONFIG_PATH%
+                    kubectl config get-contexts
+                    """
+                }
+            }
+        }
+        stage('kubectl Apply') {
+            steps {
+                bat """
+                set KUBECONFIG=%KUBECONFIG_PATH%
+                kubectl apply -f docker/kubeconfig/deployment-updated.yaml
+                kubectl apply -f docker/kubeconfig/ingress.yml
+                kubectl apply -f docker/kubeconfig/service.yml
+                kubectl apply -f docker/kubeconfig/postgresdb-deployment.yml
+                kubectl apply -f docker/kubeconfig/postgresdb-PersistentVolumeClaim.yml
+                kubectl apply -f docker/kubeconfig/postgresdb-service.yml
+                kubectl apply -f docker/kubeconfig/SecretProviderClass.yml
+                kubectl apply -f docker/kubeconfig/EmployeeHorizontalPodAutoscaler.yml
+                """
+            }
+        }
+    }
+}
