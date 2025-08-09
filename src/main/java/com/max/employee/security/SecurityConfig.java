@@ -1,5 +1,6 @@
 package com.max.employee.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
 import org.springframework.security.authentication.*;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -16,12 +17,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity // enables @PreAuthorize
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtFilter;
-    private final JpaUserDetailsService userDetailsService;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtFilter, JpaUserDetailsService uds) {
-        this.jwtFilter = jwtFilter; this.userDetailsService = uds;
-    }
+    @Autowired
+    private JwtAuthenticationFilter jwtFilter;
+
+    @Autowired
+    private JpaUserDetailsService userDetailsService;
+
 
     @Bean
     public PasswordEncoder passwordEncoder() { return new BCryptPasswordEncoder(); }
@@ -51,7 +53,7 @@ public class SecurityConfig {
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         // allow frames for H2 console (dev only)
-        http.headers(headers -> headers.frameOptions(frame -> frame.disable()));
+//        http.headers(headers -> headers.frameOptions(frame -> frame.disable()));
 
         return http.build();
     }
