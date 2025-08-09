@@ -1,0 +1,52 @@
+
+
+# ================================
+# In-memory H2 database settings
+# ================================
+# spring:
+#   datasource:
+#     url: jdbc:h2:mem:employee-db
+#     driver-class-name: org.h2.Driver
+#     username: sa
+#     password:
+#   jpa:
+#     database-platform: org.hibernate.dialect.H2Dialect
+#   h2:
+#     console:
+#       enabled: true
+#   jpa:
+#     hibernate:
+#       ddl-auto: update
+#     show-sql: true
+
+# ================================
+# Azure PostgreSQL settings (commented)
+# ================================
+# spring:
+#   datasource:
+#     url: ${SPRING_DATASOURCE_URL}
+#     username: ${SPRING_DATASOURCE_USERNAME}
+#     password: ${SPRING_DATASOURCE_PASSWORD}
+# azure:
+#   storage:
+#     connection-string: ${SPRING_AZURE_BLOB_STORAGE_CONNECTION_STRING}
+#     container-name: ${SPRING_AZURE_BLOB_STORAGE_CONTAINER_NAME}
+spring:
+  application:
+    name: employee
+  datasource:
+    url: jdbc:postgresql://employees-db.postgres.database.azure.com:5432/employee-db?sslmode=require
+    username: test
+    password: Max@1234
+azure:
+  storage:
+    connection-string: "DefaultEndpointsProtocol=https;AccountName=employeestorage26;AccountKey=NWEK8TH5UEs0+bUyzi+ELMNiC7Zl7+9e+x+hg0GBP5+3B86JG6Lr1ivoxo1Hth/iOUv6DL8Si9ck+AStiYLa4Q==;EndpointSuffix=core.windows.net"
+    container-name: employee-data
+jwt:
+  # secret: ${JWT_SECRET:change_this_to_a_strong_secret_at_runtime}
+  expiration-ms: 3600000
+  secret: 3Fv1ZLRK8a/NZ6S+Mv9jXcFJPB5GzA1VhQ0r7XfSeRY=
+  jpa:
+    hibernate:
+      ddl-auto: update
+
